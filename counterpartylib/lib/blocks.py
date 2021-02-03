@@ -210,8 +210,8 @@ def parse_block(db, block_index, block_time,
     cursor.close()
 
     # Calculate consensus hashes.
-    new_txlist_hash, found_txlist_hash = check.consensus_hash(db, 'txlist_hash', previous_txlist_hash, txlist)
-    new_ledger_hash, found_ledger_hash = check.consensus_hash(db, 'ledger_hash', previous_ledger_hash, util.BLOCK_LEDGER)
+    new_txlist_hash, _ = check.consensus_hash(db, 'txlist_hash', previous_txlist_hash, txlist)
+    new_ledger_hash, _ = check.consensus_hash(db, 'ledger_hash', previous_ledger_hash, util.BLOCK_LEDGER)
     new_messages_hash, found_messages_hash = check.consensus_hash(db, 'messages_hash', previous_messages_hash, database.BLOCK_MESSAGES)
 
     return new_ledger_hash, new_txlist_hash, new_messages_hash, found_messages_hash
@@ -815,7 +815,7 @@ def get_tx_info2(tx_hex, block_parser=None, p2sh_support=False, p2sh_is_segwit=F
             new_source, new_destination, new_data = p2sh_encoding.decode_p2sh_input(asm, p2sh_is_segwit=p2sh_is_segwit)
             # this could be a p2sh source address with no encoded data
             if new_data is None:
-              continue;
+              continue
 
             if new_source is not None:
                 if p2sh_encoding_source is not None and new_source != p2sh_encoding_source:
@@ -1163,7 +1163,7 @@ def kickstart(db, bitcoind_dir):
             # Get `tx_info`s for transactions in this block.
             block = block_parser.read_raw_block(current_hash)
             for tx in block['transactions']:
-                source, destination, btc_amount, fee, data = get_tx_info(tx['__data__'], block_parser=block_parser, block_index=block['block_index'])
+                source, destination, btc_amount, fee, data, _ = get_tx_info(tx['__data__'], block_parser=block_parser, block_index=block['block_index'])
                 if source and (data or destination == config.UNSPENDABLE):
                     transactions.append((
                         tx['tx_hash'], block['block_index'], block['block_hash'], block['block_time'],
